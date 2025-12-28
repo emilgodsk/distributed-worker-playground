@@ -5,6 +5,7 @@ riderModule.iml
 /_ReSharper.Caches/
 
 *.DotSettings.user
+.DS_Store
 
 ## A streamlined .gitignore for modern .NET projects
 ## including temporary files, build results, and
