@@ -1,6 +1,6 @@
 <Solution>
-  <Project Path="MassTransitReceiver/MassTransitReceiver.csproj" />
-  <Project Path="MassTransitSender/MassTransitSender.csproj" />
-  <Project Path="RabbitMQReceiver/RabbitMQReceiver.csproj" />
-  <Project Path="RabbitMQSender/RabbitMQSender.csproj" />
+  <Project Path="RabbitMQ/RabbitMQReceiver/RabbitMQReceiver.csproj" />
+  <Project Path="RabbitMQ/RabbitMQSender/RabbitMQSender.csproj" />
+  <Project Path="RabbitMQ/MassTransitRabbitMQReceiver/MassTransitRabbitMQReceiver.csproj" />
+  <Project Path="RabbitMQ/MassTransitRabbitMQSender/MassTransitRabbitMQSender.csproj" />
 </Solution>
