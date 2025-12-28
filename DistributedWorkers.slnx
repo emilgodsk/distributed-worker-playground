@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="MassTransitReceiver/MassTransitReceiver.csproj" />
+  <Project Path="MassTransitSender/MassTransitSender.csproj" />
+  <Project Path="RabbitMQReceiver/RabbitMQReceiver.csproj" />
+  <Project Path="RabbitMQSender/RabbitMQSender.csproj" />
+</Solution>
