@@ -15,26 +15,27 @@ public sealed class JobRepository
     public async Task<Job?> TryLeaseJobAsync(Guid workerId, CancellationToken ct)
     {
         const string sql = """
-                           UPDATE jobs
-                           SET
-                               status = 'leased',
-                               leased_by = @workerId,
-                               lease_until = now() + interval '2 minutes',
-                               heartbeat_at = now(),
-                               updated_at = now()
-                           WHERE id = (
-                               SELECT id
-                               FROM jobs
-                               -- TODO: What about failed jobs?
-                               -- Jobs are marked as 'failed' if processing fails
-                               WHERE status = 'pending'
-                                  OR (status = 'leased' AND lease_until < now())
-                               ORDER BY created_at
-                               LIMIT 1
-                               FOR UPDATE SKIP LOCKED
-                           )
-                           RETURNING id, payload;
-                           """;
+           UPDATE jobs
+           SET
+               status = 'leased',
+               leased_by = @workerId,
+               leased_at = now(),
+               lease_until = now() + interval '2 minutes',
+               heartbeat_at = now(),
+               updated_at = now()
+           WHERE id = (
+               SELECT id
+               FROM jobs
+               -- TODO: What about failed jobs?
+               -- Jobs are marked as 'failed' if processing fails
+               WHERE status = 'pending'
+                  OR (status = 'leased' AND lease_until < now())
+               ORDER BY created_at
+               LIMIT 1
+               FOR UPDATE SKIP LOCKED
+           )
+           RETURNING id, payload;
+           """;
 
         return await _connection.QuerySingleOrDefaultAsync<Job>(sql, new { workerId });
     }

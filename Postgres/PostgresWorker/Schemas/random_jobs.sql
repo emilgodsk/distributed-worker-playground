@@ -3,6 +3,7 @@ INSERT INTO jobs (
     payload,
     status,
     leased_by,
+    leased_at,
     lease_until,
     heartbeat_at,
     created_at,
@@ -17,6 +18,7 @@ SELECT
             'data', md5(random()::text)
     ),
     'pending',
+    NULL,
     NULL,
     NULL,
     NULL,

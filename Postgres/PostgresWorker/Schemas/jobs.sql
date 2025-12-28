@@ -5,6 +5,7 @@ CREATE TABLE jobs
 
     status       TEXT        NOT NULL, -- pending | leased | completed | failed
     leased_by    TEXT,
+    lease_at     TIMESTAMPTZ,
     lease_until  TIMESTAMPTZ,
 
     heartbeat_at TIMESTAMPTZ,
