@@ -21,7 +21,7 @@ So why not keep using Azure ServiceBus? Due to decisions, it has been determined
 
 ### Excluding the usage of RabbitMQ
 
-As mentioned above in the Background section, due to the hard-limit of the timeout based on the configured timeout value of RabbitMQ, and the inability to extend a lock of a message being consumed, I do not want to consider the usage of RabbitMQ for handling the consumption of message for long-running tasks.
+As mentioned above in the Background section, due to the hard-limit of the timeout based on the configured timeout value of RabbitMQ, and the inability to extend a lock of a message being consumed, I do not want to consider the usage of RabbitMQ for handling the consumption of message for long-running tasks. Down in the observations section I will go into more detail about the exploration of RabbitMQ, and verifying that it is indeed not suitable for this use-case.
 
 ### Alternative & Architecture
 
