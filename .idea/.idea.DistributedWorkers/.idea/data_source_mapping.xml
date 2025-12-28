@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourcePerFileMappings">
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/a06481ea-6cf7-4a26-83db-c36ea803df52/console.sql" value="a06481ea-6cf7-4a26-83db-c36ea803df52" />
+    <file url="file://$PROJECT_DIR$/Postgres/PostgresWorker/Schemas/random_jobs.sql" value="a06481ea-6cf7-4a26-83db-c36ea803df52" />
+  </component>
+</project>

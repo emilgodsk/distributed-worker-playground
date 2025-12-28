@@ -1,6 +1,7 @@
 <Solution>
   <Project Path="RabbitMQ/RabbitMQReceiver/RabbitMQReceiver.csproj" />
   <Project Path="RabbitMQ/RabbitMQSender/RabbitMQSender.csproj" />
+  <Project Path="Postgres/PostgresWorker/PostgresWorker.csproj" />
   <Project Path="RabbitMQ/MassTransitRabbitMQReceiver/MassTransitRabbitMQReceiver.csproj" />
   <Project Path="RabbitMQ/MassTransitRabbitMQSender/MassTransitRabbitMQSender.csproj" />
 </Solution>

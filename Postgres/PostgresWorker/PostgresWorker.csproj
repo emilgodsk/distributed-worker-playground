@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>dotnet-PostgresWorker-8609facb-9735-4a6f-8da3-f00e02921c7b</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Dapper" Version="2.1.66" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.1"/>
+        <PackageReference Include="Npgsql" Version="10.0.1" />
+    </ItemGroup>
+
+</Project>
