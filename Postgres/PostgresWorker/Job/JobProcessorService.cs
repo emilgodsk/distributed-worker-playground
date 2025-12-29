@@ -7,15 +7,15 @@ public sealed class JobProcessorService : BackgroundService
     private readonly IServiceProvider _services;
     private readonly ILogger<JobProcessorService> _logger;
 
-    // Job handoff channel
-    private readonly Channel<Job> _jobChannel = Channel.CreateUnbounded<Job>();
-
-    // Worker-ready channel
-    private readonly Channel<Guid> _workerReadyChannel = Channel.CreateBounded<Guid>(MaxWorkers);
-
     // Keep max workers configurable - consider the amount of open connections this will potentially create
     // As well as how many concurrent jobs your system can handle
     private const int MaxWorkers = 4;
+
+    // Job handoff channel
+    private readonly Dictionary<Guid, Channel<Job>> _workerJobChannels = new(MaxWorkers);
+
+    // Worker-ready channel
+    private readonly Channel<Guid> _workerReadyChannel = Channel.CreateBounded<Guid>(MaxWorkers);
 
     // Unique processor ID for this instance
     private readonly string _processorId = Guid.NewGuid().ToString();
@@ -45,9 +45,12 @@ public sealed class JobProcessorService : BackgroundService
                 stoppingToken);
 
             var workerSupervisors = Enumerable.Range(0, MaxWorkers)
-                .Select(_ => Task.Run(
-                    () => WorkerSupervisorLoop(Guid.NewGuid(), stoppingToken),
-                    stoppingToken))
+                .Select(_ =>
+                {
+                    var workerId = Guid.NewGuid();
+                    _workerJobChannels[workerId] = Channel.CreateBounded<Job>(1);
+                    return Task.Run(() => WorkerSupervisorLoop(workerId, stoppingToken), stoppingToken);
+                })
                 .ToArray();
 
             await Task.WhenAll(workerSupervisors.Append(dispatcher));
@@ -72,17 +75,16 @@ public sealed class JobProcessorService : BackgroundService
             // 1️⃣ Wait for a ready worker
             var workerId = await _workerReadyChannel.Reader.ReadAsync(ct);
 
-            using var scope = _services.CreateScope();
-            var repo = scope.ServiceProvider.GetRequiredService<JobRepository>();
-
-            Job? job = null;
+            using var dispatcherServiceScope = _services.CreateScope();
+            var dispatcherJobRepository = dispatcherServiceScope.ServiceProvider.GetRequiredService<JobRepository>();
 
             _logger.LogDebug("Trying to lease job for worker {WorkerId}", workerId);
 
+            Job? job;
             try
             {
                 // 2️⃣ Lease ONE job from DB
-                job = await repo.TryLeaseJobAsync(workerId, ct);
+                job = await dispatcherJobRepository.TryLeaseJobAsync(workerId, ct);
             }
             catch (Exception ex)
             {
@@ -96,6 +98,7 @@ public sealed class JobProcessorService : BackgroundService
             if (job == null)
             {
                 _logger.LogDebug("No jobs available, returning worker token");
+                // Return worker slot back
                 await _workerReadyChannel.Writer.WriteAsync(workerId, ct);
                 await Task.Delay(DispatcherPollDelay, ct);
                 continue;
@@ -104,7 +107,7 @@ public sealed class JobProcessorService : BackgroundService
             _logger.LogInformation("Leased job {JobId} for worker {WorkerId}", job.Id, workerId);
 
             // 3️⃣ Dispatch job to worker
-            await _jobChannel.Writer.WriteAsync(job, ct);
+            await _workerJobChannels[workerId].Writer.WriteAsync(job, ct);
         }
 
         _logger.LogInformation("Dispatcher stopped");
@@ -145,6 +148,7 @@ public sealed class JobProcessorService : BackgroundService
     private async Task WorkerLoop(Guid workerId, CancellationToken ct)
     {
         _logger.LogInformation("Worker {WorkerId} started", workerId);
+        var workerChannel = _workerJobChannels[workerId];
 
         while (!ct.IsCancellationRequested)
         {
@@ -152,7 +156,7 @@ public sealed class JobProcessorService : BackgroundService
             await _workerReadyChannel.Writer.WriteAsync(workerId, ct);
 
             // Wait for a job from dispatcher
-            var job = await _jobChannel.Reader.ReadAsync(ct);
+            var job = await workerChannel.Reader.ReadAsync(ct);
 
             using var _ = _logger.BeginScope(new Dictionary<string, object>
             {
